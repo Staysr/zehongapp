@@ -1,0 +1,80 @@
+//    public function text()
+//    {
+//        $data = db::name('users')->field('username')->select();
+//        foreach ($data as $value) {
+////             $table = 'zhtext1_devices';
+//            $table = $value['username'] . '_devices';
+//            if ($table != 'ZHTEST_devices') {
+//                $rs = db::query("SHOW TABLES LIKE '" . $table . "'");
+//                if ($rs) {
+//                    if ($table != 'ZHTEST_devices') {
+//                        $quhua = db::name($table)->field('devicenum')->select();
+//                        foreach ($quhua as $quhuvalue) {
+//                            $deviceid = db::name('devices')->where('devicenum', '=', $quhuvalue['devicenum'])->field('id,devicenum')->select();
+//                            foreach ($deviceid as $values) {
+//                                $json = db::name($table)->where('devicenum', '=', $values['devicenum'])->field('quhua')->find();
+//                                $countrp = $this->json2nameAndPhone($json['quhua']);
+//                                //print_r(isset($this->json2nameAndPhone($json['quhua'])['cname']) ? $this->json2nameAndPhone($json['quhua'])['cname'] : '');
+//                                $indevice = db::name('device_person')->insertGetId(['device_id' => $values['id'], 'username' => isset($this->json2nameAndPhone($json['quhua'])['cname']) ? $this->json2nameAndPhone($json['quhua'])['cname'] : '', 'phone' => isset($this->json2nameAndPhone($json['quhua'])['cphone']) ? $this->json2nameAndPhone($json['quhua'])['cphone'] : '', 'add_time' => time()]);
+////                                $indevice = db::name('device_address')->insertGetId(['deviceid' => $values['id'], 'deviceAddress' => $this->getDeviceAddress($json['quhua']), 'add_time' => time()]);
+//                                print_r("ok");
+//                                print_r("\n");
+//
+//                            }
+//                        }
+//                    }
+//                }
+//            }
+//
+//        }
+//    }
+
+    public function text()
+    {
+        $table = 'zhtext1_devices';
+        $rs = db::query("SHOW TABLES LIKE '" . $table . "'");
+        if ($rs) {
+            $quhua = db::name($table)->field('devicenum')->select();
+            foreach ($quhua as $quhuvalue) {
+                $deviceid = db::name('devices')->where('devicenum', '=', $quhuvalue['devicenum'])->field('id,devicenum')->select();
+                foreach ($deviceid as $values) {
+                    $json = db::name($table)->where('devicenum', '=', $values['devicenum'])->field('quhua')->find();
+//                    $indevice = db::name('device_address')->insertGetId(['deviceid' => $values['id'], 'deviceAddress' => $this->getDeviceAddress($json['quhua']), 'add_time' => time()]);
+                    $countrp = $this->json2nameAndPhone($json['quhua']);
+                    $indevice = db::name('device_person')->insertGetId(['device_id' => $values['id'], 'username' => isset($this->json2nameAndPhone($json['quhua'])['cname']) ? $this->json2nameAndPhone($json['quhua'])['cname'] : '', 'phone' => isset($this->json2nameAndPhone($json['quhua'])['cphone']) ? $this->json2nameAndPhone($json['quhua'])['cphone'] : '', 'add_time' => time()]);
+                    print_r("ok");
+                    print_r("\n");
+
+                }
+            }
+        }
+    }
+
+
+    public function getDeviceAddress($info)
+    {
+        $infos = json_decode($info, true);
+        if (is_array($infos)) {
+            if (isset($infos['cinfo'])) {
+                return $infos['cinfo'];
+            } elseif (isset($infos[0])) {
+                return $infos[0]['cinfo'];
+            }
+        }
+        return "";
+    }
+
+    public function json2nameAndPhone($json)
+    {
+        $data = json_decode($json, true);
+        if (is_array($data)) {
+            if (isset($data['cname'])) {
+                if (isset($data['cphone'])) {
+                    return ['cname' => $data['cname'], 'cphone' => $data['cphone']];
+                }
+            } elseif (isset($data[0])) {
+                return ['cname' => $data[0]['cname'], 'cphone' => $data[0]['cphone']];
+            }
+        }
+        return "";
+    }
